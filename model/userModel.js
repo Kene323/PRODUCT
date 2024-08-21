@@ -29,7 +29,11 @@ const userSchema = new mongoose.Schema({
             }
         },
     message: "Password not the same"
-    }
+    },
+    products:[{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product"
+    }]
 })
 
 const User = mongoose.model("User", userSchema)

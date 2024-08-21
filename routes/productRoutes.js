@@ -3,13 +3,13 @@ const express = require("express")
 // controller
 
 const {getProducts, createProduct, getProductById, deleteProduct, updateProduct} = require("../controller/productController")
-
+const auth = require("../utils/auth")
 const router = express.Router()
 
 router
     .route("/")
     .get(getProducts)
-    .post(createProduct)
+    .post(auth, createProduct)
 
 router
     .route("/:id")

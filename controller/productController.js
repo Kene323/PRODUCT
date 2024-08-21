@@ -1,4 +1,6 @@
+const { default: mongoose } = require("mongoose");
 const Product = require("../model/productModel")
+const userModel = require("../model/userModel")
 
 // get all Products
 
@@ -21,7 +23,15 @@ const getProducts = async (req, res) => {
 // create a new product
 
 const createProduct = async (req, res) => {
-    const { name, price, category, inStock, manufacturerName, address, specifications} = req.body
+    
+
+    try{
+        const { name, price, category, inStock, manufacturerName, address, specifications} = req.body
+    const id = req.user._id
+
+    const user = await userModel.findById(id)
+
+    if(!user) return res.status(404).json({message: "User does not exist"})
 
     const product = new Product({
         name,
@@ -33,11 +43,15 @@ const createProduct = async (req, res) => {
         specifications
     })
 
-    try{
-        const newProduct = await product.save()
+    product.user = user._id
+    product.save()
+
+    user.products?.push(new mongoose.Types.ObjectId(product._id))
+    user.save()
+
         res.status(201).json({
             success: true,
-            result: newProduct
+            result: product
         })
     }catch(err){
         res.status(500).json({
@@ -56,7 +70,7 @@ const deleteProduct = async (req, res)=>{
             message: "Product not found"
         })
     }else{
-        res.json({
+        res.status(200).json({
             success: true,
             message: "Product deleted successfully"
         })
@@ -70,7 +84,7 @@ const deleteProduct = async (req, res)=>{
 }
 
 const updateProduct = async (req, res) =>{
-    const{name, price, category, inStock, manufacturerName, address, Specifications} = req.body
+    const{name, price, category, inStock, manufacturerName, address} = req.body
 
 try{
     const updatedProduct = await Product.findByIdAndUpdate(req.params.id, {
